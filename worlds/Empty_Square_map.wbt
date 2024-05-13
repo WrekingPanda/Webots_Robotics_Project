@@ -6,25 +6,21 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/Copper.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puckDistanceSensor.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/solids/protos/SolidPipe.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/Parquetry.proto"
 
 WorldInfo {
   basicTimeStep 16
 }
 Viewpoint {
-  orientation -0.5773502691896258 0.5773502691896258 0.5773502691896258 2.0944
-  position 3.4023733393057185e-06 3.4023829604262264e-06 3.2032594811330046
+  orientation 0.5719357338227251 -0.570571020061463 -0.5893540764622592 4.204613558456062
+  position 1.1940895535733422 0.8196932972631487 5.501179912034569
 }
 TexturedBackground {
 }
 TexturedBackgroundLight {
 }
-RectangleArena {
-  floorTileSize 0.25 0.25
-  wallHeight 0.05
-}
 Robot {
-  translation -5.1595768994173006e-11 1.7705025797652924e-11 -3.1980997892130936e-05
-  rotation 0.9754602716104739 0.22017551524788243 3.154283097938374e-05 2.8174655445149062e-09
+  translation 1 1 0
   children [
     TouchSensor {
       translation 0 0 0.04
@@ -38,9 +34,11 @@ Robot {
     Lidar {
       translation 0 0 0.03
       horizontalResolution 100
+      fieldOfView 6.28319
       numberOfLayers 1
-      near 0.05
-      minRange 0.05
+      near 0.04
+      minRange 0.04
+      maxRange 3
     }
     Compass {
     }
@@ -1067,7 +1065,7 @@ Robot {
   boundingObject Group {
     children [
       Pose {
-        translation 0 0 0.025
+        translation 1 1 0.025
         rotation 1 0 0 3.141589
         children [
           Cylinder {
@@ -1100,4 +1098,13 @@ Robot {
   }
   controller "<extern>"
   cpuConsumption 1.11
+}
+RectangleArena {
+  translation 1 1 0
+  floorSize 2 2
+  floorTileSize 0.25 0.25
+  floorAppearance Parquetry {
+    type "light strip"
+  }
+  wallHeight 0.05
 }
