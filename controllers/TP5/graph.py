@@ -46,8 +46,7 @@ class Graph:
         self.vertex_set.extend(other.vertex_set)
 
     def dijkstra(self, origin: int, dest: int = -1) -> bool:
-        # TODO
-        return False
+        return self.a_star(origin, lambda _: 0, dest)
 
     # Arguments:
     # origin: Source node ID
@@ -55,7 +54,9 @@ class Graph:
     # dest: Destination node ID (-1 to search for every accessible node)
     def a_star(self, origin: int, heuristic_cost_function: Callable[[Vertex], float], dest: int = -1) -> bool:
         # Initialize the vertices
-        # TODO
+        for v in self.vertex_set:
+            v.dist = math.inf
+            v.path = None
 
         # Retrieve initial vertex s and set its dist to 0
         s: Vertex = self.find_vertex(origin)
@@ -74,11 +75,9 @@ class Graph:
                 old_dist: float = e.dest.dist
                 if self.relax(e, heuristic_cost_function):  # a shorter path was found
                     if old_dist == math.inf:  # new vertex was found
-                        # TODO
-                        pass
+                        q.insert(e.dest)
                     else:  # a shorter path to an unprocessed vertex was found (unprocessed = vertex still in the queue)
-                        # TODO
-                        pass
+                        q.decrease_key(e.dest)
         return False
 
     # Analyzes an edge in single source shortest path algorithm.
@@ -87,7 +86,9 @@ class Graph:
     def relax(self, edge: Edge, heuristic_cost_function: Callable[[Vertex], float]) -> bool:
         if edge.origin.dist + edge.weight < edge.dest.dist:
             # Update edge.dest.dist, edge.dest.path and edge.dest.cost
-            # TODO
+            edge.dest.dist = edge.origin.dist + edge.weight
+            edge.dest.path = edge
+            edge.dest.cost = edge.dest.dist + heuristic_cost_function(edge.dest)
             return True
         else:
             return False
@@ -102,7 +103,11 @@ class Graph:
         path.append(v)
 
         # Follow the path in reverse order and add each vertex to the path
-        # TODO
+        while v.path is not None:
+            v = v.path.origin
+            path.append(v)
+        # Reverse the path
+        path.reverse()
 
         # Check that the origin vertex was found, if not return []
         if len(path) == 0 or path[0].id != origin:

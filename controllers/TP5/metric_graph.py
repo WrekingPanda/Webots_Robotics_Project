@@ -14,10 +14,11 @@ from controllers.TP5.mutable_priority_queue import MutablePriorityQueue
 
 
 class VertexInfo:
-    def __init__(self, id: int, x: float, y: float):
+    def __init__(self, id: int, x: float, y: float, cost = 0):
         self.id: int = id
         self.x: float = x
         self.y: float = y
+        self.cost = cost
 
 class MetricGraph(Graph):
     def __init__(self):
@@ -25,9 +26,9 @@ class MetricGraph(Graph):
         self.vertices_info: [VertexInfo] = []
         self.visual_graph: nx.Graph = nx.Graph()
 
-    def add_vertex(self, id: int, pos: (float, float), color: str) -> bool:
+    def add_vertex(self, id: int, pos: (float, float), color: str, cost = 0) -> bool:
         if super().add_vertex(id):
-            self.vertices_info.append(VertexInfo(id, pos[0], pos[1]))
+            self.vertices_info.append(VertexInfo(id, pos[0], pos[1], cost))
             self.visual_graph.add_node(id, pos=pos, color=color)
             return True
         return False

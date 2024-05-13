@@ -23,6 +23,13 @@ class Vertex:
         self.adj.append(new_edge)
         return new_edge
 
+
+    def remove_edge(self, dest: Vertex):
+        for e in self.adj:
+            if e.dest == dest:
+                self.adj.remove(e)
+                return
+
     def __lt__(self, other: Vertex) -> bool:
         return self.cost < other.cost
 
