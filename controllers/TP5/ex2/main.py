@@ -170,7 +170,7 @@ def create_rrt_star(initial_position: (float, float), final_position: (float, fl
             # Find the vertex with least cost and find the close vertices
             close = []
             least_cost_vertex: VertexInfo = rrt_graph.vertices_info[closest_accessible_vertex.id]
-            least_cost: float = rrt_graph.vertices_info[0].cost + math.hypot(new_position[0] - closest_accessible_vertex.x,
+            least_cost: float = rrt_graph.vertices_info[closest_accessible_vertex.id].cost + math.hypot(new_position[0] - closest_accessible_vertex.x,
                                                  new_position[1] - closest_accessible_vertex.y)
             for i in range(len(rrt_graph.vertices_info) - 1):
                 vertex_info = rrt_graph.vertices_info[i]
@@ -220,7 +220,7 @@ def main() -> None:
     robot: Robot = Robot()
 
     custom_maps_filepath: str = '../../../worlds/custom_maps/'
-    map_name: str = 'obstacles'
+    map_name: str = 'LineCorridor'
     obstacle_points_filename: str = custom_maps_filepath + map_name + '_points.csv'
     final_position: (float, float) = (1.8, 1.8)
 
