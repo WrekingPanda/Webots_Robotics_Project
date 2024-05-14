@@ -174,8 +174,8 @@ def create_rrt_star(initial_position: (float, float), final_position: (float, fl
                                                  new_position[1] - closest_accessible_vertex.y)
             for i in range(len(rrt_graph.vertices_info) - 1):
                 vertex_info = rrt_graph.vertices_info[i]
-                dist = math.hypot(new_position[0] - rrt_graph.vertices_info[0].x,
-                                                 new_position[1] - rrt_graph.vertices_info[0].y)
+                dist = math.hypot(new_position[0] - vertex_info.x,
+                                                 new_position[1] - vertex_info.y)
                 if dist <= 2*incremental_distance:
                     cost = vertex_info.cost + dist
                     close.append(vertex_info)
@@ -189,14 +189,15 @@ def create_rrt_star(initial_position: (float, float), final_position: (float, fl
 
             # Add an edge between the new vertex and the closest vertex to the graph
             rrt_graph.add_edge(least_cost_vertex.id, len(rrt_graph.vertices_info) - 1, new_distance, True)
-            rrt_graph.vertices_info[-1].cost = least_cost_vertex.cost+new_distance
+            rrt_graph.vertices_info[-1].cost = least_cost_vertex.cost + new_distance
 
             # Check if the last added vertex is directly accessible.
             # If so, add a vertex for the final vertex, create an edge to it and stop the algorithm.
             if is_collision_free_line(rrt_graph.vertices_info[-1].x, rrt_graph.vertices_info[-1].y, final_position[0], final_position[1],
                                       obstacle_cloud):
                 # Add the final position vertex
-                rrt_graph.add_vertex(cur_index, (final_position[0], final_position[1]), 'blue',0)
+                rrt_graph.add_vertex(cur_index, (final_position[0], final_position[1]), 'blue',math.hypot(rrt_graph.vertices_info[-1].x - final_position[0],
+                                                  rrt_graph.vertices_info[-1].y - final_position[1]))
                 cur_index += 1
 
                 last_vertex_dist_to_final: float = math.hypot(rrt_graph.vertices_info[-1].x - final_position[0],
@@ -206,11 +207,11 @@ def create_rrt_star(initial_position: (float, float), final_position: (float, fl
 
             #Rewiring
             for vertex_info in close:
-                dist = math.hypot(new_position[0] - vertex_info.x, new_position[1] - vertex_info.y) < vertex_info.cost
+                dist = math.hypot(new_position[0] - vertex_info.x, new_position[1] - vertex_info.y)
                 if rrt_graph.vertices_info[-1].cost + dist < vertex_info.cost and is_collision_free_line(vertex_info.x, vertex_info.y,
                                           new_position[0], new_position[1], obstacle_cloud):
                     vertex_info.cost = rrt_graph.vertices_info[-1].cost + dist
-                    rrt_graph.add_edge(len(rrt_graph.vertices_info)-1, vertex_info.id, dist, True)
+                    rrt_graph.add_edge(vertex_info.id, len(rrt_graph.vertices_info)-1, dist, True)
             break
 
     return False, rrt_graph
@@ -262,6 +263,7 @@ def main() -> None:
     new_vertex_colors: dict = {}
     for vertex in path:
         new_vertex_colors[vertex.id] = "green"
+        print(vertex.id, rrt_graph.vertices_info[vertex.id].cost)
     nx.set_node_attributes(rrt_graph.visual_graph, new_vertex_colors, 'color')
     # Create the PolyCollection for the obstacles, for the plot
     pat: [patches.Rectangle] = []
