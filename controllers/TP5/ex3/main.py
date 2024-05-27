@@ -15,8 +15,9 @@ from controllers.utils import move_robot_to, warp_robot
 
 
 def compute_attractive_force(robot_position: np.ndarray, final_position: np.ndarray) -> np.ndarray:
-    # TODO
-    return
+    dist: float = np.linalg.norm(final_position - robot_position)
+    force: np.ndarray = (final_position - robot_position) / dist
+    return force
 
 def compute_repulsive_force(lidar_cloud: [LidarPoint]) -> np.ndarray:
     d_max: float = 0.2
@@ -31,12 +32,18 @@ def compute_repulsive_force(lidar_cloud: [LidarPoint]) -> np.ndarray:
 
     for i in range(window_size // 2, n_readings + (window_size // 2)):
         # Determine if the reading is below the max repulsion distance. If not, skip the iteration.
-        # TODO
-        pass
+        point: LidarPoint = lidar_cloud[i]
+        dist: float = math.hypot(point.x, point.y)
+        if dist > d_max:
+            continue
 
         # Test if the reading is a local minimum
-        # TODO
-        pass
+        neighbor_distances: [float] = [math.hypot(point.x, point.y) for point in
+                                       lidar_cloud[i - (window_size // 2): i + (window_size // 2)]]
+        if dist > min(neighbor_distances):
+            continue
+
+        local_minima.append(point)
 
     print("n minima = ", len(local_minima))
     print("minima = ", [(point.x, point.y) for point in local_minima])
@@ -44,8 +51,10 @@ def compute_repulsive_force(lidar_cloud: [LidarPoint]) -> np.ndarray:
     # Compute the resulting force
     force: np.ndarray = np.array([0.0, 0.0])
     for point in local_minima:
-        # TODO
-        pass
+        dist: float = math.hypot(point.x, point.y)
+        if dist > d_max:
+            continue
+        force -= ((1/dist) - (1/d_max)) * np.array([point.x, point.y]) / dist
 
     return force
 
@@ -54,8 +63,11 @@ def compute_resulting_force(robot_position: np.ndarray, final_position: np.ndarr
     alpha: float = 1.0
     beta: float = 0.25  # 0.025
 
-    # TODO
-    return
+    af: np.ndarray = compute_attractive_force(np.array(robot_position), np.array(final_position))
+    print("|af| = ", np.linalg.norm(af), ", af = ", af)
+    rf: np.ndarray = compute_repulsive_force(lidar_cloud)
+    print("|rf| = ", np.linalg.norm(rf), ", rf = ", rf)
+    return alpha*af + beta*rf
 
 def draw_quiver_plots(supervisor: Supervisor, final_position: (float, float), obstacle_cloud: np.ndarray):
     lidar: Lidar = supervisor.getDevice('lidar')

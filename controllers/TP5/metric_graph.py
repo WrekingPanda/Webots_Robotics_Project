@@ -11,6 +11,7 @@ import networkx as nx
 from controllers.TP5.graph import Graph
 from controllers.TP5.vertex_edge import Vertex, Edge
 from controllers.TP5.mutable_priority_queue import MutablePriorityQueue
+from controllers.utils import is_collision_free_line
 
 
 class VertexInfo:
@@ -39,3 +40,42 @@ class MetricGraph(Graph):
             self.visual_graph.add_edge(origin, dest)
             return True
         return False
+
+    def get_pruned_path_los(self, origin: int, dest: int, obstacle_cloud) -> [Vertex]:
+        pruned_path = []
+        path = self.get_path(origin, dest)
+        print(f"Original path size: {len(path)}")
+        if len(path) < 2:
+            return []
+        pruned_path.append(path[0])
+        s_index = 0
+        e_index = 1
+        while path[e_index].id != dest:
+            if is_collision_free_line(self.vertices_info[path[s_index].id].x, self.vertices_info[path[s_index].id].y, self.vertices_info[path[e_index].id].x, self.vertices_info[path[e_index].id].y, obstacle_cloud):
+                e_index += 1
+            else:
+                s_index = e_index - 1
+                pruned_path.append(path[e_index-1])
+        pruned_path.append(path[-1])
+        print(f"Pruned path size: {len(pruned_path)}")
+        return pruned_path
+
+    def get_pruned_path_global(self, origin: int, dest: int, obstacle_cloud) -> [Vertex]:
+        pruned_path = []
+        path = self.get_path(origin, dest)
+        print(f"Original path size: {len(path)}")
+        if len(path) < 2:
+            return []
+        pruned_path.append(path[0])
+        s_index = 0
+        e_index = len(path) - 1
+        while pruned_path[-1].id != dest:
+            if is_collision_free_line(self.vertices_info[path[s_index].id].x, self.vertices_info[path[s_index].id].y, self.vertices_info[path[e_index].id].x, self.vertices_info[path[e_index].id].y, obstacle_cloud):
+                pruned_path.append(path[e_index])
+                s_index = e_index
+                e_index = len(path) - 1
+            else:
+                e_index -= 1
+        print(f"Pruned path size: {len(pruned_path)}")
+        return pruned_path
+

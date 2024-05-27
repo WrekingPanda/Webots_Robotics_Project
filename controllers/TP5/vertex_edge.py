@@ -17,6 +17,9 @@ class Vertex:
         self.path: Union[Edge, None] = None
         self.cost: float = 0  # cost function of the vertex for A*
         self.queue_index = 0  # required by MutablePriorityQueue
+        self.queue_index_f = 0
+        self.queue_index_b = 0
+
 
     def add_edge(self, dest: Vertex, weight: float) -> Edge:
         new_edge: Edge = Edge(self, dest, weight)

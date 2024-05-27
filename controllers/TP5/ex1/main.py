@@ -7,6 +7,8 @@ import math
 import time
 from typing import Union, Dict
 
+from scipy.spatial import KDTree
+
 from matplotlib import pyplot as plt, patches
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Rectangle
@@ -37,10 +39,10 @@ def create_grid_graph(initial_pos: (float, float), final_pos: (float, float), ob
     grid_graph = MetricGraph()
 
     # Add the grid vertices
-    n_xy_divisions: int = 16
+    n_xy_divisions: int = 25
     # We assume that the x and y coordinates in any point of the map are positive
-    max_x: float = 2.0
-    max_y: float = 2.0
+    max_x: float = 1.9
+    max_y: float = 1.9
 
     min_x_offset: float = max_x / n_xy_divisions / 2.0
     x_increment: float = max_x / n_xy_divisions
@@ -52,7 +54,7 @@ def create_grid_graph(initial_pos: (float, float), final_pos: (float, float), ob
         for j in range(n_xy_divisions):
             y: float = min_y_offset + j * y_increment
             # Add a vertex to point (x,y)
-            # TODO
+            grid_graph.add_vertex(cur_index, (x, y), 'blue')
             cur_index += 1
 
     # Add the initial and final vertices
@@ -68,9 +70,21 @@ def create_grid_graph(initial_pos: (float, float), final_pos: (float, float), ob
         return grid_graph
     grid_graph.add_edge(len(grid_graph.vertices_info) - 2, closest_vertex_to_initial.id,
                         math.hypot(initial_pos[0] - closest_vertex_to_initial.x, initial_pos[1] - closest_vertex_to_initial.y))
+    grid_graph.add_edge(closest_vertex_to_initial.id, len(grid_graph.vertices_info) - 2,
+                        math.hypot(initial_pos[0] - closest_vertex_to_initial.x,
+                                   initial_pos[1] - closest_vertex_to_initial.y))
 
     # Connect the final point to the closest point in the grid using edges
-    # TODO
+    closest_vertex_to_final: Union[VertexInfo, None] = find_closest_accessible_vertex(final_pos[0], final_pos[1], grid_graph.vertices_info[:-2], obstacle_cloud)
+    if closest_vertex_to_final is None:
+        print("Final position ", final_pos, " is not accessible by any point in the grid.")
+        return grid_graph
+    grid_graph.add_edge(closest_vertex_to_final.id, len(grid_graph.vertices_info) - 1,
+                        math.hypot(final_pos[0] - closest_vertex_to_final.x,
+                                   final_pos[1] - closest_vertex_to_final.y))
+    grid_graph.add_edge(len(grid_graph.vertices_info) - 1, closest_vertex_to_final.id,
+                        math.hypot(final_pos[0] - closest_vertex_to_final.x,
+                                   final_pos[1] - closest_vertex_to_final.y))
 
     # Add the grid edges
     cur_index = 0
@@ -82,18 +96,49 @@ def create_grid_graph(initial_pos: (float, float), final_pos: (float, float), ob
                 grid_graph.add_edge(cur_index - n_xy_divisions, cur_index, x_increment)
             # Add an edge with the top neighbor
             if j > 0 and is_collision_free_line(grid_graph.vertices_info[cur_index].x, grid_graph.vertices_info[cur_index].y, grid_graph.vertices_info[cur_index - 1].x, grid_graph.vertices_info[cur_index - 1].y, obstacle_cloud):
-                # TODO
-                pass
+                grid_graph.add_edge(cur_index, cur_index - 1, y_increment)
+                grid_graph.add_edge(cur_index - 1, cur_index, y_increment)
             cur_index += 1
 
     return grid_graph
 
 
+def create_prm_graph(initial_pos: (float, float), final_pos: (float, float), obstacle_cloud: np.ndarray) -> MetricGraph:
+    prm_graph = MetricGraph()
+    n_samples = 500
+    neighbors = 7
+    max_x: float = 1.9
+    max_y: float = 1.9
+    points = []
+    count = 0
+    while count < n_samples:
+        random_position: (float, float) = (np.random.uniform(0, max_x), np.random.uniform(0, max_y))
+        if is_collision_free_point(random_position[0], random_position[1], obstacle_cloud):
+            points.append(np.array([random_position[0], random_position[1]]))
+            prm_graph.add_vertex(count, random_position, 'blue')
+            count += 1
+            print(count)
+    additional_points: [(float, float)] = [initial_pos, final_pos]
+    for point in additional_points:
+        points.append(np.array([point[0], point[1]]))
+        prm_graph.add_vertex(count, point, 'green')
+        count += 1
+    points_kd_tree = KDTree(points)
+    for index1, point1 in enumerate(points):
+        print(index1)
+        distances, indices = points_kd_tree.query(point1, k=neighbors + 1)
+        for distance, index2 in zip(distances[1:], indices[1:]):
+            point2 = points[index2]
+            if is_collision_free_line(point1[0], point1[1],
+                                          point2[0], point2[1], obstacle_cloud):
+                prm_graph.add_edge(index1, index2, distance)
+                prm_graph.add_edge(index2, index1, distance)
+    return prm_graph
 def main() -> None:
     robot: Robot = Robot()
 
     custom_maps_filepath: str = '../../../worlds/custom_maps/'
-    map_name: str = 'obstacles'
+    map_name: str = 'UCorner'
     obstacle_points_filename: str = custom_maps_filepath + map_name + '_points.csv'
     final_position: (float, float) = (1.76, 1.76)
 
@@ -134,18 +179,22 @@ def main() -> None:
     def dist_func(v: Vertex):
         return vertex_distances[v.id]
     start = time.time()
-    grid_graph.a_star(len(grid_graph.vertex_set) - 2, dist_func, len(grid_graph.vertex_set) - 1)
+    #grid_graph.a_star(len(grid_graph.vertex_set) - 2, dist_func, len(grid_graph.vertex_set) - 1)
+    #grid_graph.d_star(len(grid_graph.vertex_set) - 2, len(grid_graph.vertex_set) - 1)
+    #grid_graph.dijkstra(len(grid_graph.vertex_set) - 2, len(grid_graph.vertex_set) - 1)
     end = time.time()
     print("Elapsed time for A* : ", end - start, " seconds")
-    path: [Vertex] = grid_graph.get_path(len(grid_graph.vertex_set) - 2, len(grid_graph.vertex_set) - 1)
-
+    #path: [Vertex] = grid_graph.get_path(len(grid_graph.vertex_set) - 2, len(grid_graph.vertex_set) - 1)
+    #path: [Vertex] = grid_graph.get_pruned_path_los(len(grid_graph.vertex_set) - 2, len(grid_graph.vertex_set) - 1, obstacle_cloud)
+    #path: [Vertex] = grid_graph.get_pruned_path_global(len(grid_graph.vertex_set) - 2, len(grid_graph.vertex_set) - 1,obstacle_cloud)
+    path = grid_graph.get_path_bidirectional_dijkstra(len(grid_graph.vertex_set) - 2, len(grid_graph.vertex_set) - 1)
     # Mark with a new color the unvisited vertices and the ones in the path
     new_vertex_colors: dict = {}
     for vertex in path:
-        new_vertex_colors[vertex.id] = "green"
-    for vertex in grid_graph.vertex_set:
-        if vertex.dist == math.inf:
-            new_vertex_colors[vertex.id] = "red"
+        new_vertex_colors[vertex.id] = "red"
+    #for vertex in grid_graph.vertex_set:
+        #if vertex.dist == math.inf:
+            #new_vertex_colors[vertex.id] = "orange"
     nx.set_node_attributes(grid_graph.visual_graph, new_vertex_colors, 'color')
 
     # Create the PolyCollection for the obstacles, for the plot

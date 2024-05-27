@@ -10,6 +10,7 @@ from controllers.TP5.vertex_edge import Vertex, Edge
 from controllers.TP5.mutable_priority_queue import MutablePriorityQueue
 
 
+
 class Graph:
     def __init__(self):
         self.vertex_set: [Vertex] = []
@@ -80,9 +81,128 @@ class Graph:
                         q.decrease_key(e.dest)
         return False
 
-    # Analyzes an edge in single source shortest path algorithm.
-    # Returns true if the target vertex was relaxed (dist, path).
-    # Used by all single-source shortest path algorithms.
+
+    def d_star(self, origin: int, dest: int = -1) -> bool:
+        # Initialize the vertices
+        for v in self.vertex_set:
+            v.dist = math.inf
+            v.path = None
+
+        end: Vertex = self.find_vertex(dest)
+        end.dist = 0
+
+        q: MutablePriorityQueue = MutablePriorityQueue()
+        q.insert(end)
+
+        while not q.empty():
+            v: Vertex = q.extract_min()
+            if v.id == origin:  # the destination was found so the search can stop
+                return True
+            for e in v.adj:
+                old_dist: float = e.dest.dist
+                if e.origin.dist + e.weight < e.dest.dist:
+                    e.dest.dist = e.origin.dist + e.weight
+                    e.dest.path = e
+                    e.dest.cost = e.dest.dist
+                    if old_dist == math.inf:  # new vertex was found
+                        q.insert(e.dest)
+                    else:  # a shorter path to an unprocessed vertex was found (unprocessed = vertex still in the queue)
+                        q.decrease_key(e.dest)
+        return False
+
+
+    def bidirectional_dijkstra(self, origin: int, dest: int = -1):
+        mu = math.inf
+
+        # Initialize the vertices
+        for v in self.vertex_set:
+            v.dist = math.inf
+            v.path = None
+
+        pf = [None] * len(self.vertex_set)
+        pb = [None] * len(self.vertex_set)
+
+        df = [math.inf] * len(self.vertex_set)
+        db = [math.inf] * len(self.vertex_set)
+
+        df[origin] = 0
+        db[dest] = 0
+
+        start: Vertex = self.find_vertex(origin)
+
+        end: Vertex = self.find_vertex(dest)
+
+        forward = set()
+        backwards = set()
+
+        q_forward: MutablePriorityQueue = MutablePriorityQueue()
+        q_forward.insert(start)
+
+        q_backwards: MutablePriorityQueue = MutablePriorityQueue()
+        q_backwards.insert(end)
+
+        # Process the vertices
+        while (not q_forward.empty()) and (not q_backwards.empty()):
+            v: Vertex = q_forward.extract_min(bi=True,f=True, d=df)
+            u: Vertex = q_backwards.extract_min(bi=True,f=False, d=db)
+
+            forward.add(v)
+            backwards.add(u)
+
+            for e in v.adj:
+                old_dist: float = df[e.dest.id]
+                if df[e.dest.id] > df[v.id] + e.weight:
+                    df[e.dest.id] = df[v.id] + e.weight
+                    pf[e.dest.id] = v
+                    if old_dist == math.inf:
+                        q_forward.insert(e.dest,d=df)
+                    else:
+                        q_forward.decrease_key(e.dest, bi=True,f=True,d=df)
+                    if db[e.dest.id] != math.inf and df[v.id] + e.weight + db[e.dest.id] < mu:
+                        mu = df[v.id] + e.weight + db[e.dest.id]
+                        answer_backwards = e.dest.id
+                        answer_forward = v.id
+
+            for e in u.adj:
+                old_dist: float = db[e.dest.id]
+                if db[e.dest.id] > db[u.id] + e.weight:
+                    db[e.dest.id] = db[u.id] + e.weight
+                    pb[e.dest.id] = u
+                    if old_dist == math.inf:
+                        q_backwards.insert(e.dest,d=db)
+                    else:
+                        q_backwards.decrease_key(e.dest, bi=True,f=False,d=db)
+                    if df[e.dest.id] != math.inf and db[u.id] + e.weight + df[e.dest.id] < mu:
+                        mu = db[u.id] + e.weight + df[e.dest.id]
+                        answer_backwards = u.id
+                        answer_forward = e.dest.id
+
+            if df[v.id] + db[u.id] > mu:
+                return [True, answer_forward, answer_backwards, pf, pb]
+
+        return [False]
+
+    def get_path_bidirectional_dijkstra(self, origin: int, dest: int = -1):
+        forward: [Vertex] = []
+        backwards: [Vertex] = []
+
+        r = self.bidirectional_dijkstra(origin, dest)
+
+        if r[0]:
+            v: Vertex = self.find_vertex(r[1])
+            forward.append(v)
+            while r[3][v.id] is not None:
+                v = r[3][v.id]
+                forward.append(v)
+            forward.reverse()
+
+            v: Vertex = self.find_vertex(r[2])
+            backwards.append(v)
+            while r[4][v.id] is not None:
+                v = r[4][v.id]
+                backwards.append(v)
+        return forward+backwards
+
     def relax(self, edge: Edge, heuristic_cost_function: Callable[[Vertex], float]) -> bool:
         if edge.origin.dist + edge.weight < edge.dest.dist:
             # Update edge.dest.dist, edge.dest.path and edge.dest.cost
@@ -113,3 +233,25 @@ class Graph:
         if len(path) == 0 or path[0].id != origin:
             return []
         return path
+
+    def get_path_reverse(self, origin: int, dest: int) -> [Vertex]:
+        path: [Vertex] = []
+
+        # Add the destination vertex to the path
+        v: Vertex = self.find_vertex(origin)
+        if v is None or v.dist == math.inf:  # missing or disconnected vertex
+            return []
+        path.append(v)
+
+        # Follow the path in reverse order and add each vertex to the path
+        while v.path is not None:
+            v = v.path.origin
+            path.append(v)
+
+        # Check that the origin vertex was found, if not return []
+        if len(path) == 0 or path[0].id != origin:
+            return []
+        return path
+
+
+

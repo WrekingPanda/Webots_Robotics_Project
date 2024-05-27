@@ -30,55 +30,81 @@ class MutablePriorityQueue(Generic[T]):
 
     # Removes the element with the smallest key from the queue, according to the < operator of type T.
     # Temporal complexity: O(log(N)), where N is the number of elements in the queue.
-    def extract_min(self) -> T:
+    def extract_min(self,bi = False, f = False, d=None) -> T:
         x: T = self.heap[1]
         self.heap[1] = self.heap[-1]
         self.heap.pop()
         if len(self.heap) > 1:
-            self.heapify_down(1)
-        x.queue_index = 0
+            self.heapify_down(1,bi,f, d)
+        if bi:
+            if f:
+                x.queue_index_f = 0
+            else:
+                x.queue_index_b = 0
+        else:
+            x.queue_index = 0
         return x
 
     # Inserts a new element in the queue.
     # Temporal complexity: O(log(N)), where N is the number of elements in the queue.
-    def insert(self, x: T) -> None:
+    def insert(self, x: T, bi = False, f = False, d=None) -> None:
         self.heap.append(x)
-        self.heapify_up(len(self.heap) - 1)
+        self.heapify_up(len(self.heap) - 1, bi, f, d)
 
     # Updates an existing element of the queue, so that it has a smaller key, according to the < operator of type T.
     # Temporal complexity: O(log(N)), where N is the number of elements in the queue.
-    def decrease_key(self, x: T) -> None:
-        self.heapify_up(x.queue_index)
+    def decrease_key(self, x: T, bi = False, f = False, d=None) -> None:
+        self.heapify_up(x.queue_index, bi, f, d)
 
     # Moves the element at index i further up the queue, to reflect its correct key placement (smallest key elements first).
     # Temporal complexity: O(log(N)), where N is the number of elements in the queue.
-    def heapify_up(self, i: int) -> None:
+    def heapify_up(self, i: int, bi = False, f = False, d=None) -> None:
         x: T = self.heap[i]
-        while i > 1 and x < self.heap[parent(i)]:
-            self.set(i, self.heap[parent(i)])
-            i = parent(i)
-        self.set(i, x)
+        if bi:
+            while i > 1 and d[x.id] < d[self.heap[parent(i)].id]:
+                self.set(i, self.heap[parent(i)], bi, f)
+                i = parent(i)
+            self.set(i, x, bi, f)
+        else:
+            while i > 1 and x < self.heap[parent(i)]:
+                self.set(i, self.heap[parent(i)], bi, f)
+                i = parent(i)
+            self.set(i, x, bi, f)
 
     # Moves the element at index i further down the queue, to reflect its correct key placement (smallest key elements first).
     # Temporal complexity: O(log(N)), where N is the number of elements in the queue.
-    def heapify_down(self, i: int) -> None:
+    def heapify_down(self, i: int, bi = False, f = False, d=None) -> None:
         x: T = self.heap[i]
         while True:
             k: int = left_child(i)
             if k >= len(self.heap):
                 break  # stop because i-th element has no children
-            if (k+1 < len(self.heap)) and self.heap[k+1] < self.heap[k]:
-                k += 1  # right child of i is the smallest and should switch with i, rather than the left-child, which is done by default in each iteration
-            if not (self.heap[k] < x):
-                break  # stop because child is not smaller than the i-th element
-            self.set(i, self.heap[k])
-            i = k
-        self.set(i, x)
+            if bi:
+                if (k+1 < len(self.heap)) and d[self.heap[k+1].id] < d[self.heap[k].id]:
+                    k += 1  # right child of i is the smallest and should switch with i, rather than the left-child, which is done by default in each iteration
+                if not (d[self.heap[k].id] < d[x.id]):
+                    break  # stop because child is not smaller than the i-th element
+                self.set(i, self.heap[k], bi, f)
+                i = k
+            else:
+                if (k+1 < len(self.heap)) and self.heap[k+1] < self.heap[k]:
+                    k += 1  # right child of i is the smallest and should switch with i, rather than the left-child, which is done by default in each iteration
+                if not (self.heap[k] < x):
+                    break  # stop because child is not smaller than the i-th element
+                self.set(i, self.heap[k], bi, f)
+                i = k
+        self.set(i, x, bi, f)
 
     # Sets the i-th element of the queue to be x.
     # Temporal complexity: O(1)
-    def set(self, i: int, x: T) -> None:
+    def set(self, i: int, x: T, bi = False, f = False) -> None:
         self.heap[i] = x
-        x.queue_index = i
+        if bi:
+            if f:
+                x.queue_index_f = i
+            else:
+                x.queue_index_b = i
+        else:
+            x.queue_index = i
 
 

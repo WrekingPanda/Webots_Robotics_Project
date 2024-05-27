@@ -221,7 +221,7 @@ def main() -> None:
     robot: Robot = Robot()
 
     custom_maps_filepath: str = '../../../worlds/custom_maps/'
-    map_name: str = 'LineCorridor'
+    map_name: str = 'crazy'
     obstacle_points_filename: str = custom_maps_filepath + map_name + '_points.csv'
     final_position: (float, float) = (1.8, 1.8)
 
