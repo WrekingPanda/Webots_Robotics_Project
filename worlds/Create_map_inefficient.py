@@ -4,8 +4,8 @@ import csv
 import os
 
 if __name__ == '__main__':
-    custom_maps_filepath: str = '../Evaluation_Maps_Final/'
-    map_name: str = 'GridMaze'
+    custom_maps_filepath: str = 'Evaluation_Maps_Final/'
+    map_name: str = 'Curved_Spiral'
 
     # Process the image to get the coords of the wall pixels
     image_filename: str = map_name + '_map.png'
