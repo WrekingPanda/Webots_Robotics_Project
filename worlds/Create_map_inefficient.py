@@ -4,7 +4,7 @@ import csv
 import os
 
 if __name__ == '__main__':
-    custom_maps_filepath: str = 'D:/Paulo Alexandre/Ensino_Superior/3_ano/2_semestre/Intro_Robotica/Projeto/Webots_Robotics_Project/worlds/' #'../Evaluation_Maps_Final/'
+    custom_maps_filepath: str = '../Evaluation_Maps_Final/'
     map_name: str = 'GridMaze'
 
     # Process the image to get the coords of the wall pixels
