@@ -13,13 +13,15 @@ WorldInfo {
 }
 Viewpoint {
   orientation 0.5719357338227251 -0.570571020061463 -0.5893540764622592 4.204613558456062
-  position 0.9339960695824177 0.4292385286062374 3.890320020707881
+  position 1.171021707863707 0.7713708412956151 5.591746595527996
 }
 TexturedBackground {
 }
 TexturedBackgroundLight {
 }
-Robot {
+DEF EPUCK Robot {
+  translation 0.17000000000796364 0.3600000000056814 -1.9677927998793324e-05
+  rotation 0.9999999999849063 -5.4942904657253665e-06 6.767336976769837e-09 2.9821304420431976e-05
   children [
     TouchSensor {
       translation 0 0 0.04
@@ -32,12 +34,12 @@ Robot {
     }
     Lidar {
       translation 0 0 0.03
-      horizontalResolution 100
+      horizontalResolution 201
       fieldOfView 6.28319
       numberOfLayers 1
-      near 0.04
-      minRange 0.04
-      maxRange 3
+      near 0.032
+      minRange 0.032
+      maxRange 2
     }
     Compass {
     }
@@ -45,6 +47,7 @@ Robot {
     }
     HingeJoint {
       jointParameters HingeJointParameters {
+        position 7.457293612095226e-09
         axis 0 1 0
         anchor 0 0 0.02
       }
@@ -60,7 +63,7 @@ Robot {
         }
       ]
       endPoint DEF EPUCK_LEFT_WHEEL Solid {
-        translation 0 0.026 0.02
+        translation 0 0.026000000000000034 0.02
         rotation 0 1 0 0
         children [
           DEF EPUCK_WHEEL Pose {
@@ -197,6 +200,7 @@ Robot {
     }
     HingeJoint {
       jointParameters HingeJointParameters {
+        position 7.457938946223112e-09
         axis 0 1 0
         anchor 0 0 0.02
       }
@@ -1096,5 +1100,6 @@ Robot {
     ]
   }
   controller "<extern>"
+  supervisor TRUE
   cpuConsumption 1.11
 }
