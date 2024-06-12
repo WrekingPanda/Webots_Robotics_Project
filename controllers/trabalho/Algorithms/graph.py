@@ -1,7 +1,3 @@
-"""
-A simple implementation of a graph, including a relax operation for single source shortest-path algorithms.
-By: Gonçalo Leão
-"""
 from __future__ import annotations
 import math
 from typing import Union, Callable

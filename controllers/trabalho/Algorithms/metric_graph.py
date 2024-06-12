@@ -1,7 +1,3 @@
-"""
-A simple implementation of a metric graph, including a utility graph for visualization.
-By: Gonçalo Leão
-"""
 from __future__ import annotations
 import math
 from typing import Union, Callable
@@ -85,3 +81,9 @@ class MetricGraph(Graph):
         print(f"Pruned path size: {len(pruned_path)}")
         return pruned_path
 
+    def get_path_dist(self, path):
+        distance = 0
+        for v in range(len(path)-1):
+            distance+= math.hypot(self.vertices_info[path[v].id].x - self.vertices_info[path[v+1].id].x ,
+                                   self.vertices_info[path[v].id].y  - self.vertices_info[path[v+1].id].y )
+        return distance

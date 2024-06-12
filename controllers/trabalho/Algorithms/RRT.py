@@ -14,7 +14,7 @@ from controllers.trabalho.utils import is_collision_free_point, is_collision_fre
 
 
 def create_rrt(initial_position: (float, float), final_position: (float, float), obstacle_cloud: np.ndarray) -> (bool, MetricGraph):
-    max_iterations: int = 500
+    max_iterations: int = 1000
     incremental_distance: float = 0.25
     # We assume that the x and y coordinates in any point of the map are positive
     max_x: float = 2.0

@@ -37,8 +37,8 @@ def create_grid_graph(initial_pos: (float, float), final_pos: (float, float), ob
     # Add the grid vertices
     n_xy_divisions: int = 20
     # We assume that the x and y coordinates in any point of the map are positive
-    max_x: float = 1.9
-    max_y: float = 1.9
+    max_x: float = 2
+    max_y: float = 2
 
     min_x_offset: float = max_x / n_xy_divisions / 2.0
     x_increment: float = max_x / n_xy_divisions
@@ -101,8 +101,8 @@ def create_grid_graph(initial_pos: (float, float), final_pos: (float, float), ob
 
 def create_prm_graph(initial_pos: (float, float), final_pos: (float, float), obstacle_cloud: np.ndarray) -> MetricGraph:
     prm_graph = MetricGraph()
-    n_samples = 400
-    neighbors = 5
+    n_samples = 500
+    neighbors = 7
     max_x: float = 1.9
     max_y: float = 1.9
     points = []

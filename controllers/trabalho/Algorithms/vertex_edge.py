@@ -1,7 +1,3 @@
-"""
-A simple implementation of a graph vertex and edge.
-By: Gonçalo Leão
-"""
 from __future__ import annotations
 
 from typing import Union

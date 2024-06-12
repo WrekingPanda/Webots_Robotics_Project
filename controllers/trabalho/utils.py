@@ -1,7 +1,3 @@
-"""
-Some useful functions, namely for Webots and for working with the epuck robot (https://cyberbotics.com/doc/guide/epuck?version=R2021a).
-By: Gonçalo Leão
-"""
 import math
 from typing import List
 
@@ -236,8 +232,8 @@ def collides_segment_rectangle(x1: float, y1: float, x2: float, y2: float, rx: f
 
 
 def is_collision_free_line(x1: float, y1: float, x2: float, y2: float, obstacle_cloud: np.ndarray) -> bool:
-    obstacle_size: float = 0.04
-    min_obstacle_dist: float = 0.05
+    obstacle_size: float = 0.02
+    min_obstacle_dist: float = 0.02
     for obstacle in obstacle_cloud:
         if collides_segment_rectangle(x1, y1, x2, y2,
                                       obstacle[0] - min_obstacle_dist, obstacle[1] - min_obstacle_dist,
@@ -248,7 +244,7 @@ def is_collision_free_line(x1: float, y1: float, x2: float, y2: float, obstacle_
 
 def is_collision_free_point(x: float, y: float, obstacle_cloud: np.ndarray) -> bool:
     obstacle_size: float = 0.001
-    min_obstacle_dist: float = 0.05
+    min_obstacle_dist: float = 0.02
     for obstacle in obstacle_cloud:
         if collides_point_rectangle(x, y,
                                     obstacle[0] - min_obstacle_dist, obstacle[1] - min_obstacle_dist,

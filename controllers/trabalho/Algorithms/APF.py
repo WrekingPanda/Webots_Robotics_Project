@@ -64,7 +64,7 @@ def compute_resulting_force(robot_position: np.ndarray, final_position: np.ndarr
 
     return alpha*af + beta*rf
 
-def draw_quiver_plots(supervisor: Supervisor, final_position: (float, float), obstacle_cloud: np.ndarray):
+def draw_quiver_plots(supervisor: Supervisor, final_position: (float, float), obstacle_cloud: np.ndarray, fast=False):
     lidar: Lidar = supervisor.getDevice('lidar')
     gps: GPS = supervisor.getDevice('gps')
 
@@ -109,36 +109,37 @@ def draw_quiver_plots(supervisor: Supervisor, final_position: (float, float), ob
             fx[i][j] = resulting_force[0]
             fy[i][j] = -resulting_force[1]
 
-    # Create the PolyCollection for the obstacles, for the plots
-    pat: [patches.Rectangle] = []
-    for point in obstacle_cloud:
-        pat.append(Rectangle((point[0], point[1]), 0.001, 0.001,
-                             linewidth=1, edgecolor='black', facecolor='none'))
+    if not fast:
+        # Create the PolyCollection for the obstacles, for the plots
+        pat: [patches.Rectangle] = []
+        for point in obstacle_cloud:
+            pat.append(Rectangle((point[0], point[1]), 0.001, 0.001,
+                                 linewidth=1, edgecolor='black', facecolor='none'))
 
-    # Draw the quiver plots
-    fig, ax = plt.subplots()
-    ax.quiver(X, Y, afx, afy)
-    col: PatchCollection = PatchCollection(pat)
-    col.set_edgecolor('black')
-    col.set_linewidth(1)
-    ax.add_collection(col)
-    ax.set_title('Attractive forces')
-    plt.show()
+        # Draw the quiver plots
+        fig, ax = plt.subplots()
+        ax.quiver(X, Y, afx, afy)
+        col: PatchCollection = PatchCollection(pat)
+        col.set_edgecolor('black')
+        col.set_linewidth(1)
+        ax.add_collection(col)
+        ax.set_title('Attractive forces')
+        plt.show()
 
-    fig, ax = plt.subplots()
-    ax.quiver(X, Y, rfx, rfy)
-    col: PatchCollection = PatchCollection(pat)
-    col.set_edgecolor('black')
-    col.set_linewidth(1)
-    ax.add_collection(col)
-    ax.set_title('Repulsive forces')
-    plt.show()
+        fig, ax = plt.subplots()
+        ax.quiver(X, Y, rfx, rfy)
+        col: PatchCollection = PatchCollection(pat)
+        col.set_edgecolor('black')
+        col.set_linewidth(1)
+        ax.add_collection(col)
+        ax.set_title('Repulsive forces')
+        plt.show()
 
-    fig, ax = plt.subplots()
-    ax.quiver(X, Y, fx, fy)
-    col: PatchCollection = PatchCollection(pat)
-    col.set_edgecolor('black')
-    col.set_linewidth(1)
-    ax.add_collection(col)
-    ax.set_title('Resulting force field')
-    plt.show()
+        fig, ax = plt.subplots()
+        ax.quiver(X, Y, fx, fy)
+        col: PatchCollection = PatchCollection(pat)
+        col.set_edgecolor('black')
+        col.set_linewidth(1)
+        ax.add_collection(col)
+        ax.set_title('Resulting force field')
+        plt.show()
