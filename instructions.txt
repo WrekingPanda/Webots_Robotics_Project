@@ -5,9 +5,17 @@ It is all written in Python, version 3.11, with the following libraries needed t
 	- scipy 1.11.4
 	- matplotlib 3.8.0
 	- future 0.18.3
+	- PIL 10.2.0
 In order to run the project, it is required that both the directories of the project and the Webots python controller are included in the content root of PyCharm.
 Finally, it is also conveninent to verify that the robot controller inside of Webots is set to "external".
 
 In order to run an example, the Webots simulator must be open with the desired map loaded from the "worlds" directory.
-Then, run the file test_algorithm.py in pycharm after setting the variables with the desired algorithm name within the following list: A*, Dijkstra, D*, Bidirectional, RRT, RRT*,APF.
-Finally, 
+Then, run the file test_algorithms.py in pycharm after setting the desired map name in line 37 to match the map name loaded in Webots.
+Example:
+In test_algorithms.py:
+	- (line37) map_name = 'V_Corner'
+In Webots:
+	- 'V_Corner.wbt' loaded and V_Corner_points.csv in the same directory
+
+As an extra, given a .png file in the worlds/Evaluation_Maps_Final directory with the name as 'A_map.png', the file Create_map.py in the worlds directory will create a new map.
+In order to this work, continuing the example given above, after changing the 'image_filename' in line 11 to 'A', the script will create a A.wbt to load in Webots and a A_pojnts.csv file for the algorithms script.
