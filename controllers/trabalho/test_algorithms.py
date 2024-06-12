@@ -34,7 +34,7 @@ def main(fast=False) -> None:
     count = 0
     # robot: Robot = Robot()
     custom_maps_filepath: str = '../../worlds/custom_maps/'
-    map_name = 'VCorner'
+    map_name = 'VCorner' # CHANGE THE MAP HERE
     obstacle_points_filename: str = custom_maps_filepath + map_name + '_points.csv'
     final_position: (float, float) = (1.76, 1.76)
 
@@ -145,7 +145,7 @@ def main(fast=False) -> None:
 
                 if not fast:
                     new_vertex_colors: dict = {}
-                    for vertex in path_global:
+                    for vertex in path:
                         new_vertex_colors[vertex.id] = "red"
                     for vertex in graph.vertex_set:
                         if vertex.dist == math.inf:
